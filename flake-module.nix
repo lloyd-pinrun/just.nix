@@ -39,7 +39,6 @@ in {
       inherit
         (pkgs)
         mkShell
-        wrapProgram
         writeText
         ;
     in {
@@ -112,7 +111,7 @@ in {
           finalPackage = mkOption {
             type = types.package;
             readOnly = true;
-            default = wrapProgram just.package "just" "just" "--add-flags \"--justfile ${just.justfile}\"" {};
+            default = pkgs.lib.wrapProgram just.package "just" "just" "--add-flags \"--justfile ${just.justfile}\"" {};
             description = "Final just package";
           };
 
