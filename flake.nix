@@ -10,11 +10,7 @@
     pre-commit.url = "github:cachix/git-hooks.nix";
   };
 
-  outputs = inputs @ {
-    flake-parts,
-    systems,
-    ...
-  }:
+  outputs = inputs @ {flake-parts, ...}:
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
         inputs.pre-commit.flakeModule

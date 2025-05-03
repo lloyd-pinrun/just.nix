@@ -21,13 +21,16 @@ in {
         attrNames
         attrValues
         getAttr
+        hasAttr
         ;
 
       inherit
         (lib)
         concatStringsSep
+        getExe
         literalExpression
         mkEnableOption
+        mkIf
         mkOption
         mkPackageOption
         pipe
@@ -66,15 +69,6 @@ in {
                 ...
               }: {
                 options = {
-                  # enable = mkOption {
-                  #   type = types.bool;
-                  #   default = true;
-                  #   example = literalExpression "false";
-                  #   description = ''
-                  #     Whether to enable this recipe to be used in just.
-                  #   '';
-                  # };
-
                   command = mkOption {
                     type = types.str;
                     example = literalExpression ''
@@ -111,22 +105,12 @@ in {
           finalPackage = mkOption {
             type = types.package;
             readOnly = true;
-            default = pkgs.lib.wrapProgram just.package "just" "just" "--add-flags \"--justfile ${just.justfile}\"" {};
             description = "Final just package";
           };
 
           devShell = mkOption {
             type = types.package;
             readOnly = true;
-            default = mkShell {
-              packages = [
-                just.finalPackage
-                pkgs.git
-              ];
-              shellHook = ''
-                export JUST_WORKING_DIRECTORY="$(${pkgs.lib.getExe pkgs.git} rev-parse --show-toplevel)"
-              '';
-            };
             description = "The devShell which includes the just executable.";
           };
 
@@ -147,8 +131,33 @@ in {
         };
       };
 
-      config = {
-        just.recipes."list" = "@just --list";
+      config = mkIf just.enable {
+        just = {
+          recipes."list" = "@just --list";
+
+          finalPackage =
+            if hasAttr "override" just.package
+            then
+              just.package.overrideAttrs (attrs: {
+                nativeBuildInputs =
+                  (attrs.nativeBuildInputs or [])
+                  ++ [pkgs.makeWrapper];
+
+                postInstall =
+                  (attrs.postInstall or "")
+                  + ''
+                    wrapProgram $out/bin/just --add-flags "--justfile ${just.justfile}"
+                  '';
+              })
+            else just.package;
+
+          devShell = mkShell {
+            packages = [just.finalPackage pkgs.git];
+            shellHook = ''
+              export JUST_WORKING_DIRECTORY="$(${getExe pkgs.git} rev-parse --show-toplevel)"
+            '';
+          };
+        };
       };
     });
   };

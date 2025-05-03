@@ -4,6 +4,8 @@
     pkgs,
     ...
   }: {
+    formatter = pkgs.alejandra;
+
     devShells.default = pkgs.mkShell {
       name = "just.nix development shell";
       packages = with pkgs; [alejandra deadnix nixd statix];
