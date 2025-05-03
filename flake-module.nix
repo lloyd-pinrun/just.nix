@@ -21,7 +21,6 @@ in {
         attrNames
         attrValues
         getAttr
-        isString
         ;
 
       inherit
@@ -42,10 +41,8 @@ in {
         (pkgs)
         mkShell
         wrapProgram
-        writeTextFile
+        writeText
         ;
-
-      workingDirectory = "${getExe pkgs.git} rev-parse --show-toplevel";
     in {
       options = {
         just = {
@@ -116,8 +113,8 @@ in {
           finalPackage = mkOption {
             type = types.package;
             readOnly = true;
-            default = wrapProgram just.package "just" "just" "--add-flags \"--justfile ${just.justfile.content}\"" {};
-            description = "Resulting just package.";
+            default = wrapProgram just.package "just" "just" "--add-flags \"--justfile ${just.justfile}\"" {};
+            description = "Final just package";
           };
 
           devShell = mkOption {
@@ -125,50 +122,26 @@ in {
             readOnly = true;
             default = mkShell {
               packages = [just.finalPackage];
-              shellHook = "export JUST_WORKING_DIRECTORY=${workingDirectory}";
+              shellHook = ''
+                export JUST_WORKING_DIRECTORY="$(${getExe pkgs.git} rev-parse --show-toplevel)"
+              '';
             };
             description = "The devShell which includes the just executable.";
           };
 
-          justfile = {
-            path = mkOption {
-              type = types.nullOr types.str;
-              default = workingDirectory;
-              description = "The path in which to store the generated justfile.";
-            };
-
-            content = mkOption {
-              type = types.package;
-              readOnly = true;
-              default = let
-                inherit (just.justfile) path;
-
-                writeJustfile = text:
-                  if isString just.justfile.path
-                  then
-                    writeTextFile {
-                      inherit text;
-
-                      name = "justfile";
-                      destination = path;
-                    }
-                  else
-                    writeTextFile {
-                      inherit text;
-                      name = "justfile";
-                    };
-              in
-                pipe just.recipes [
-                  (
-                    recipes:
-                      toList (recipes.${just.defaultRecipe} or [])
-                      ++ attrValues (removeAttrs recipes [just.defaultRecipe])
-                  )
-                  (map (getAttr "recipe"))
-                  (concatStringsSep "\n")
-                  writeJustfile
-                ];
-            };
+          justfile = mkOption {
+            type = types.package;
+            readOnly = true;
+            default = pipe just.recipes [
+              (
+                recipes:
+                  toList (recipes.${just.defaultRecipe} or [])
+                  ++ attrValues (removeAttrs recipes [just.defaultRecipe])
+              )
+              (map (getAttr "recipe"))
+              (concatStringsSep "\n")
+              (writeText "justfile")
+            ];
           };
         };
       };
