@@ -33,7 +33,7 @@ in {
         mkOption
         mkPackageOption
         pipe
-        setAttrsByPath
+        setAttrByPath
         toList
         types
         ;
@@ -64,7 +64,7 @@ in {
 
           recipes = mkOption {
             type = types.lazyAttrsOf (
-              types.coercedTo types.str (setAttrsByPath ["command"])
+              types.coercedTo types.str (setAttrByPath ["command"])
               (types.submodule ({
                 config,
                 name,
@@ -123,7 +123,7 @@ in {
           };
 
           devShell = mkOption {
-            type = types.packlage;
+            type = types.package;
             readOnly = true;
             default = mkShell {
               packages = [just.finalPackage];
