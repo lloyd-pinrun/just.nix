@@ -28,8 +28,13 @@
           no-commit-to-branch.settings.branch = ["main"];
 
           # -- Misc --
-          markdownlint.enable = true;
-          mdsh.enable = true;
+          markdownlint = {
+            enable = true;
+            settings.configuration = {
+              MD033.allowed_elements = ["h1" "code"];
+              MD013.line_length = 120;
+            };
+          };
           typos.enable = true;
 
           # -- Nix --
