@@ -161,11 +161,11 @@ in {
                     };
               in
                 pipe just.recipes [
-                  (recipes:
-                    toList (
-                      recipes.${just.defaultRecipe} or []
+                  (
+                    recipes:
+                      toList (recipes.${just.defaultRecipe} or [])
                       ++ attrValues (removeAttrs recipes [just.defaultRecipe])
-                    ))
+                  )
                   (map (getAttr "recipe"))
                   (concatStringsSep "\n")
                   writeJustfile
