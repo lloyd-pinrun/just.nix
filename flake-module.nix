@@ -111,9 +111,7 @@ in {
             '';
           };
 
-          package = mkPackageOption pkgs "just" {
-            default = pkgs.just;
-          };
+          package = mkPackageOption pkgs "just" {};
 
           finalPackage = mkOption {
             type = types.package;
