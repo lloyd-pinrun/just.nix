@@ -26,7 +26,6 @@ in {
       inherit
         (lib)
         concatStringsSep
-        getExe
         literalExpression
         mkEnableOption
         mkOption
@@ -121,9 +120,12 @@ in {
             type = types.package;
             readOnly = true;
             default = mkShell {
-              packages = [just.finalPackage];
+              packages = [
+                just.finalPackage
+                pkgs.git
+              ];
               shellHook = ''
-                export JUST_WORKING_DIRECTORY="$(${getExe pkgs.git} rev-parse --show-toplevel)"
+                export JUST_WORKING_DIRECTORY="$(${pkgs.lib.getExe pkgs.git} rev-parse --show-toplevel)"
               '';
             };
             description = "The devShell which includes the just executable.";
