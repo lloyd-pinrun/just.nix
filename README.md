@@ -1,10 +1,6 @@
-<h1 align=center><code>just.nix</code></h1>
-
 ## WIP
 
-**This is still very rough around the edges, including the `README`** 😅
-
-`just.nix` is a portable Nix flake to allow configuring `justfile` recipes from within your Nix projects
+Just a little flake to help integrate `just` command runner into my Nix projects :)
 
 ## 🙌 Acknowledgments
 
